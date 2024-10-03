@@ -1,0 +1,233 @@
+目的:
+押してる長さによって音の長さを変えたい
+htmlのkey(鍵盤に適応させたい)
+おとをながすのはarduinoとする
+nodejsでサーバーを動かしている
+nodejsとarduinoはserialportを使用して、通信してるものとする
+```index.html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ピアノアプリ</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .piano {
+            display: flex;
+            position: relative;
+        }
+        .key {
+            width: 60px;
+            height: 200px;
+            border: 1px solid #000;
+            background-color: white;
+            position: relative;
+            cursor: pointer;
+        }
+        .key.black {
+            width: 40px;
+            height: 120px;
+            background-color: black;
+            position: absolute;
+            margin-left: -20px;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="piano">
+        <div class="key" data-note="SCALE_C3"></div>
+        <div class="key black" data-note="SCALE_C_SHARP3" style="left: 60px;"></div>
+        <div class="key" data-note="SCALE_D3"></div>
+        <div class="key black" data-note="SCALE_D_SHARP3" style="left: 122px;"></div>
+        <div class="key" data-note="SCALE_E3"></div>
+        <div class="key" data-note="SCALE_F3"></div>
+        <div class="key black" data-note="SCALE_F_SHARP3" style="left: 247px;"></div>
+        <div class="key" data-note="SCALE_G3"></div>
+        <div class="key black" data-note="SCALE_G_SHARP3" style="left: 310px;"></div>
+        <div class="key" data-note="SCALE_A3"></div>
+        <div class="key black" data-note="SCALE_A_SHARP3" style="left: 432px;"></div>
+        <div class="key" data-note="SCALE_B3"></div>
+        <div class="key" data-note="SCALE_C4"></div>
+    </div>    
+    <script src="script.js"></script>
+</body>
+</html>
+'''
+'''script.js
+document.addEventListener("DOMContentLoaded", function() {
+    const keys = document.querySelectorAll('.key');
+
+    keys.forEach(key => {
+        key.addEventListener('click', function() {
+            const note = this.getAttribute('data-note');
+
+            // ノートをサーバーに送信
+            fetch('http://localhost:3000/send-note', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ note: note })
+            })
+            .then(response => response.text())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+'''
+'''index.js
+const express = require('express');
+const cors = require('cors'); // CORSをインポート
+const { SerialPort } = require('serialport');
+
+const app = express();
+const port = new SerialPort({
+    path: 'COM5', // 使用するポート名に変更
+    baudRate: 9600,
+});
+
+app.use(cors()); // CORSを有効にする
+app.use(express.json()); // JSONボディを解析
+
+// エラー処理
+port.on('error', (err) => {
+    console.error('Error: ', err.message);
+});
+
+// ポートが開いたときの処理
+port.on('open', () => {
+    console.log('ARDUINOのポートが正常に起動しました');
+});
+
+app.post('/send-note', (req, res) => {
+    const note = req.body.note; // クライアントから送信されたノート
+    if (note) {
+        port.write(note, (err) => {
+            if (err) {
+                return res.status(500).send("データの転送が失敗しました");
+            }
+            console.log("データは無事転送されました");
+            res.status(200).send("データは無事転送されました");
+        });
+    } else {
+        res.status(400).send("ノートが提供されていません");
+    }
+});
+
+app.listen(3000, () => {
+    console.log('サーバーがポート3000で起動しました');
+});
+'''
+'''arduino
+// 音の周波数
+#define C  130.81
+#define E  329.628
+
+// ピエゾスピーカーを接続するピン
+const int speakerPin = 2;
+
+void setup() {
+  pinMode(speakerPin, OUTPUT);
+  Serial.begin(9600); // シリアル通信を9600bpsで開始
+  tone(speakerPin, 130.813, 30);
+  delay(60);
+  tone(speakerPin, 261.626, 30);
+};
+
+const int frequencies[] = {
+  130.813,  // C3 (ド)
+  138.591,  // C#3 (ドシャープ)
+  146.832,  // D3 (レ)
+  155.563,  // D#3 (レシャープ)
+  164.814,  // E3 (ミ)
+  174.614,  // F3 (ファ)
+  185.000,  // F#3 (ファシャープ)
+  195.998,  // G3 (ソ)
+  207.652,  // G#3 (ソシャープ)
+  220.000,  // A3 (ラ)
+  233.082,  // A#3 (ラシャープ)
+  246.942,  // B3 (シ)
+  261.626   // C4 (ド)
+};
+
+
+// 音階のインデックス
+enum Scale {
+  SCALE_C3,
+  SCALE_C_SHARP3,
+  SCALE_D3,
+  SCALE_D_SHARP3,
+  SCALE_E3,
+  SCALE_F3,
+  SCALE_F_SHARP3,
+  SCALE_G3,
+  SCALE_G_SHARP3,
+  SCALE_A3,
+  SCALE_A_SHARP3,
+  SCALE_B3,
+  SCALE_C4
+};
+
+
+void Sound(Scale scale, int length);
+
+void Sound(Scale scale, int length) {
+  int frequency = frequencies[scale]; // 音階に対応する周波数を取得
+  tone(speakerPin, frequency, length); // ピン8に音を鳴らす（任意のピン番号に変更可能）
+}
+
+void loop() {
+  if (Serial.available()) {
+    String command = ""; // 受信データを保存する変数
+    while (Serial.available()) {
+        char c = (char)Serial.read(); // 1文字ずつ読み取る
+        command += c; // 受信データを連結
+        delay(10); // 読み取りの安定性を確保するために少し待つ
+    }
+
+    // 受信データの前後の空白や改行をトリム
+    command.trim();
+
+    Serial.print("受信データー: ");
+    Serial.println(command); // 一行で表示
+    if (command == "SCALE_C3") {
+      Sound(SCALE_C3, 100);
+    } else if (command == "SCALE_C_SHARP3") {
+      Sound(SCALE_C_SHARP3, 100);
+    } else if (command == "SCALE_D3") {
+      Sound(SCALE_D3, 100);
+    } else if (command == "SCALE_D_SHARP3") {
+      Sound(SCALE_D_SHARP3, 100);
+    } else if (command == "SCALE_E3") {
+      Sound(SCALE_E3, 100);
+    } else if (command == "SCALE_F3") {
+      Sound(SCALE_F3, 100);
+    } else if (command == "SCALE_F_SHARP3") {
+      Sound(SCALE_F_SHARP3, 100);
+    } else if (command == "SCALE_G3") {
+      Sound(SCALE_G3, 100);
+    } else if (command == "SCALE_G_SHARP3") {
+      Sound(SCALE_G_SHARP3, 100);
+    } else if (command == "SCALE_A3") {
+      Sound(SCALE_A3, 100);
+    } else if (command == "SCALE_A_SHARP3") {
+      Sound(SCALE_A_SHARP3, 100);
+    } else if (command == "SCALE_B3") {
+      Sound(SCALE_B3, 100);
+    } else if (command == "SCALE_C4") {
+      Sound(SCALE_C4, 100);
+    } else {
+      Serial.println("Command does not match any scale");
+    }
+  }
+}
+'''

@@ -1,0 +1,25 @@
+.piano {
+    width: 800px;
+    margin: 20px auto;
+    border-bottom: 2px solid #333;
+  }
+  
+  .key {
+    display: inline-block;
+    height: 150px;
+    cursor: pointer;
+  }
+  
+  .white {
+    width: 40px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+  }
+  
+  .black {
+    width: 25px;
+    background-color: #333;
+    margin-left: -15px;
+    position: relative;
+    top: -30px; 
+  }

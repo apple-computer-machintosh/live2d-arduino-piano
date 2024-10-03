@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ピアノアプリ</title>
+    <style>
+        html, body {
+            overflow: hidden;
+            height: 100vh;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-image: url("./images/virtual_bg_01_unit01.png");
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .piano {
+            display: flex;
+            position: relative;
+        }
+        .key {
+            width: 60px;
+            height: 200px;
+            border: 1px solid #000;
+            background-color: white;
+            position: relative;
+            cursor: pointer;
+        }
+        .key.black {
+            width: 40px;
+            height: 120px;
+            background-color: black;
+            position: absolute;
+            margin-left: -20px;
+            z-index: 1;
+        }
+        h1 {
+            font-family: "Mochiy Pop One", sans-serif;
+            font-weight: 400;
+        }
+        button {
+            background-color: aquamarine;
+            padding: 16px 48px;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: large;
+            font-family: Arial, Helvetica, sans-serif;
+            margin-top: 16px;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to ピアノのセカイ</h1>
+        <div class="piano">
+            <div class="key" data-note="SCALE_C3"></div>
+            <div class="key black" data-note="SCALE_C_SHARP3" style="left: 60px;"></div>
+            <div class="key" data-note="SCALE_D3"></div>
+            <div class="key black" data-note="SCALE_D_SHARP3" style="left: 122px;"></div>
+            <div class="key" data-note="SCALE_E3"></div>
+            <div class="key" data-note="SCALE_F3"></div>
+            <div class="key black" data-note="SCALE_F_SHARP3" style="left: 247px;"></div>
+            <div class="key" data-note="SCALE_G3"></div>
+            <div class="key black" data-note="SCALE_G_SHARP3" style="left: 310px;"></div>
+            <div class="key" data-note="SCALE_A3"></div>
+            <div class="key black" data-note="SCALE_A_SHARP3" style="left: 432px;"></div>
+            <div class="key" data-note="SCALE_B3"></div>
+            <div class="key" data-note="SCALE_C4"></div>
+        </div>
+        <div style="padding-top: 32px;">
+            <select id="pattern-select">
+                <option value="" selected disabled>--Please choose an option--</option>
+                <option value="pattern1">歓喜の歌 by ベートーヴェン</option>
+                <option value="pattern2">千本桜</option>
+                <option value="pattern3">???</option>
+            </select>
+            <button id="auto-play">自動演奏を開始</button>
+        </div>
+        <canvas id="canvas" style="position: absolute; z-index: -1;"></canvas>
+    </div>
+    
+    <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js"></script>
+    <script>
+        const cubism4Model =
+        "https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json";
+    
+        (async function main() {
+            const app = new PIXI.Application({
+                view: document.getElementById("canvas"),
+                autoStart: true,
+                resizeTo: window,
+                transparent: true
+            });
+    
+            const model4 = await PIXI.live2d.Live2DModel.from(cubism4Model);
+    
+            app.stage.addChild(model4);
+    
+            model4.scale.set(0.25);
+            model4.x = window.innerWidth / 1.8; // 再設定
+            window.addEventListener('resize', () => {
+                model4.x = window.innerWidth / 1.8; // 再設定
+            });
+        })();
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
