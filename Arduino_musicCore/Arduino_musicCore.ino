@@ -71,10 +71,56 @@ void playPattern(const Scale* pattern, const int* lengths, int patternLength) {
     }
 }
 
+bool isPlaying = false;
+
+void playLoop(String arg) {
+  // Serial.println(arg);
+
+  Scale scale = SCALE_NONE;
+
+  // 引数の文字列に基づいてスケールを設定
+  for (int i = 0; i < SCALE_COUNT; i++) {
+      if (arg == scaleNames[i]) {
+          scale = static_cast<Scale>(i);
+          break;
+      }
+  }
+
+  // tone関数で音を鳴らす
+  if (scale != SCALE_NONE) {
+      int frequency = frequencies[scale]; // 対応する周波数を取得
+      // Serial.println(isPlaying);
+      while (isPlaying) {
+        // Serial.println(frequency);
+        tone(speakerPin, frequency);
+        String command = Serial.readStringUntil('\n');
+        command.trim();
+        if (command == "STOP") {
+          // Serial.println("STOP");
+          isPlaying = false;
+          noTone(speakerPin);
+          return;
+        };
+      };
+  } else {
+      Serial.println("Invalid scale.");
+      Sound(SCALE_C3, 100);
+      delay(100);
+      Sound(SCALE_C3, 100);
+      delay(100);
+      Sound(SCALE_C3, 100);
+  }
+};
+
 void loop() {
     if (Serial.available()) {
         String command = Serial.readStringUntil('\n');
         command.trim();
+        if (command.indexOf("LOOP_") == 0) {
+          String argument = command.substring(5);
+          isPlaying = true;
+          playLoop(argument);
+        };
 
         // 鍵盤の音を再生
         int commaIndex = command.indexOf(',');
