@@ -49,3 +49,17 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
+
+document.querySelectorAll('.key').forEach(key => {
+    key.addEventListener('mousedown', () => {
+        key.classList.add('active');
+    });
+    
+    key.addEventListener('mouseup', () => {
+        key.classList.remove('active');
+    });
+    
+    key.addEventListener('mouseleave', () => {
+        key.classList.remove('active');
+    });
+});

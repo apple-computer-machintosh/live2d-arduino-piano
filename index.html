@@ -34,6 +34,7 @@
             background-color: white;
             position: relative;
             cursor: pointer;
+            transition: background-color 0.1s, transform 0.1s;
         }
         .key.black {
             width: 40px;
@@ -42,6 +43,15 @@
             position: absolute;
             margin-left: -20px;
             z-index: 1;
+            transition: background-color 0.1s, transform 0.1s; /* 追加 */
+        }
+        .key.active {
+            transform: rotateX(8deg);
+            background-color: #f4f4f4
+        }
+        .key.key.black.active {
+            transform: translateY(1px) scale(1.01);
+            background-color: black;
         }
         h1 {
             font-family: "Mochiy Pop One", sans-serif;
@@ -65,8 +75,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to ピアノのセカイ</h1>
-        <div class="piano">
+        <h1>ピアノのセカイへようこそ</h1>
+        <div class="piano" style="z-index: 1;">
             <div class="key" data-note="SCALE_C3"></div>
             <div class="key black" data-note="SCALE_C_SHARP3" style="left: 60px;"></div>
             <div class="key" data-note="SCALE_D3"></div>
@@ -81,7 +91,7 @@
             <div class="key" data-note="SCALE_B3"></div>
             <div class="key" data-note="SCALE_C4"></div>
         </div>
-        <div style="padding-top: 32px;">
+        <div style="padding-top: 32px; z-index: 10;">
             <select id="pattern-select">
                 <option value="" selected disabled>--Please choose an option--</option>
                 <option value="pattern1">歓喜の歌 by ベートーヴェン</option>
@@ -90,17 +100,17 @@
             </select>
             <button id="auto-play">自動演奏を開始</button>
         </div>
-        <canvas id="canvas" style="position: absolute; z-index: -1;"></canvas>
+        <canvas id="canvas" style="position: absolute;"></canvas>
     </div>
-    
+        
     <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js"></script>
     <script>
         const cubism4Model =
-        "https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json";
-    
+        "./lib/models/miku_pro_jp/runtime/miku_sample_t04.model3.json";
+
         (async function main() {
             const app = new PIXI.Application({
                 view: document.getElementById("canvas"),
@@ -108,18 +118,46 @@
                 resizeTo: window,
                 transparent: true
             });
-    
+
             const model4 = await PIXI.live2d.Live2DModel.from(cubism4Model);
-    
             app.stage.addChild(model4);
-    
-            model4.scale.set(0.25);
-            model4.x = window.innerWidth / 1.8; // 再設定
+
+            // モデルのスケールを設定
+            model4.scale.set(0.8);
+            
+            // モデルの位置を設定
+            model4.x = window.innerWidth / 1.8;
+
+            // 表情を管理する配列
+            const expressions = [
+                'Idle',
+                'Tap'
+            ];
+
+            let currentExpressionIndex = 0;
+
+            // モデルをインタラクティブにする
+            model4.interactive = true; 
+            model4.buttonMode = true;  // カーソルをポインターにする
+
+            // クリックイベントを追加
+            model4.on('pointerdown', () => {
+                console.log("click")
+                // 表情を切り替え
+                currentExpressionIndex = (currentExpressionIndex + 1) % expressions.length;
+                const expression = expressions[currentExpressionIndex];
+
+                // 表情を設定
+                model4.motion("Tap")
+            });
+
+            // ウィンドウサイズが変更された時の処理
             window.addEventListener('resize', () => {
                 model4.x = window.innerWidth / 1.8; // 再設定
             });
         })();
     </script>
+
     <script src="script.js"></script>
 </body>
 </html>
