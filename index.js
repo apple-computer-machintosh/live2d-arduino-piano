@@ -42,7 +42,7 @@ app.post('/loop', (req, res) => {
         if (err) {
             return res.status(500).send('Error on write: ' + err.message);
         }
-        // console.log(`Sent: LOOP_${scale}`);
+        console.log(`Sent: LOOP_${scale}`);
         res.send('Looping ' + scale);
     });
 });

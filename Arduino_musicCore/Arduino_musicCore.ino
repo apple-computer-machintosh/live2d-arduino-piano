@@ -6,7 +6,7 @@ const int speakerPin = 2;
 const char* scaleNames[] = {
     "SCALE_G2",
     "SCALE_C3",
-    "SCALE_C_SHARP3",
+    // "SCALE_C_SHARP3",
     "SCALE_D3",
     "SCALE_D_SHARP3",
     "SCALE_E3",
@@ -19,13 +19,15 @@ const char* scaleNames[] = {
     "SCALE_B3",
     "SCALE_C4",
     "SCALE_D4",
+    "SCALE_E4",
+    "SCALE_G4",
     "SCALE_NONE"  // 追加
 };
 
 enum Scale {
     SCALE_G2,
     SCALE_C3,
-    SCALE_C_SHARP3,
+    // SCALE_C_SHARP3,
     SCALE_D3,
     SCALE_D_SHARP3,
     SCALE_E3,
@@ -38,14 +40,16 @@ enum Scale {
     SCALE_B3,
     SCALE_C4,
     SCALE_D4,
+    SCALE_E4,
+    SCALE_G4,
     SCALE_NONE, // 追加
     SCALE_COUNT
 };
 
 const int frequencies[SCALE_COUNT] = {
-    97.999, 130.813, 138.591, 146.832, 155.563, 164.814, 
+    97.999, 130.813, /*138.591,*/ 146.832, 155.563, 164.814, 
     174.614, 185.000, 195.998, 207.652, 220.000, 
-    233.082, 246.942, 261.626, 293.665,
+    233.082, 246.942, 261.626, 293.665, 329.628, 391.995,
     0 // SCALE_NONE の周波数は0に設定
 };
 
@@ -74,7 +78,6 @@ void playPattern(const Scale* pattern, const int* lengths, int patternLength) {
 bool isPlaying = false;
 
 void playLoop(String arg) {
-  // Serial.println(arg);
 
   Scale scale = SCALE_NONE;
 
@@ -86,6 +89,7 @@ void playLoop(String arg) {
       }
   }
 
+  Serial.println(scale);
   // tone関数で音を鳴らす
   if (scale != SCALE_NONE) {
       int frequency = frequencies[scale]; // 対応する周波数を取得
@@ -107,8 +111,6 @@ void playLoop(String arg) {
       Sound(SCALE_C3, 100);
       delay(100);
       Sound(SCALE_C3, 100);
-      delay(100);
-      Sound(SCALE_C3, 100);
   }
 };
 
@@ -119,6 +121,7 @@ void loop() {
         if (command.indexOf("LOOP_") == 0) {
           String argument = command.substring(5);
           isPlaying = true;
+          Serial.println(command);
           playLoop(argument);
         };
 
@@ -188,27 +191,34 @@ void loop() {
               133.33, 133.33, 233.33, 233.33, 133.33, 266.67, 133.33,
               133.33, 133.33, 133.33, 133.33, 133.33, 133.33, 133.33,
               133.33, 133.33, 300, 300, 300, 300, 133.33, 133.33, 133.33, 133.33, 533.33
-                  // 200, 200, 350, 350, 200, 400, 200,
-                  // 200, 200, 200, 200, 200, 200, 200,
-                  // 200, 200, 350, 350, 200, 400, 200,
-                  // 200, 200, 200, 200, 200, 200, 200,
-                  // 200, 200, 350, 350, 200, 400, 200,
-                  // 200, 200, 200, 200, 200, 200, 200,
-                  // 200, 200, 450, 450, 450, 450, 200, 200, 200, 200, 200, 250,
-                  // 200, 200, 350, 350, 200, 400, 200,
-                  // 200, 200, 200, 200, 200, 200, 200,
-                  // 200, 200, 350, 350, 200, 400, 200,
-                  // 200, 200, 200, 200, 200, 400, 25,
-                  // 200, 200, 350, 350, 200, 400, 200,
-                  // 200, 200, 200, 200, 200, 200, 200,
-                  // 200, 200, 450, 450, 450, 450, 200, 200, 200, 200, 800
             };
             playPattern(pattern2, lengths2, sizeof(pattern2) / sizeof(pattern2[0]));
         } else if (command == "pattern3") {
             const Scale pattern3[] = {
-                SCALE_C4, SCALE_B3, SCALE_A3
+                // SCALE_D3, SCALE_G3, SCALE_C3, SCALE_B3, SCALE_G4, SCALE_NONE,
+                SCALE_B3, SCALE_G3, SCALE_G3, SCALE_B3, SCALE_G3, SCALE_G3, SCALE_E3, SCALE_G3, SCALE_E4, SCALE_D4, SCALE_A_SHARP3, SCALE_A3, SCALE_G3, SCALE_A3, SCALE_G3, SCALE_NONE,
+  
+                // SCALE_C4, SCALE_A3, SCA              // SCALE_D3, SCALE_G3, SCALE_D3, SCALE_G3, SCALE_A3, SCALE_B3, SCALE_C4, SCALE_D4, SCALE_B3, SCALE_A3, SCALE_G3, SCALE_B3, SCALE_NONE,
+                // SCALE_B3, SCALE_G3, SCALE_G3, SCALE_B3, SCALE_G3, SCALE_E3, SCALE_G3, SCALE_E4, SCALE_D4, SCALE_A_SHARP3, SCALE_A3, SCALE_G3, SCALE_A3, SCALE_G3, SCALE_NONE,
+                // SCALE_B3, SCALE_C4, SCALE_C4, SCALE_B3, SCALE_C4,LE_E3, SCALE_D4, SCALE_B3, SCALE_D4, SCALE_D4, SCALE_E3,
+                // SCALE_B3, SCALE_G3, SCALE_G3, SCALE_B3, SCALE_G3, SCALE_G3, SCALE_E3, SCALE_E3, SCALE_G3, SCALE_E3, SCALE_D4, SCALE_B3, SCALE_A3, SCALE_G3, SCALE_A3, SCALE_G3, SCALE_NONE,
+                // SCALE_D3, SCALE_G3, SCALE_D3, SCALE_G3, SCALE_A3, SCALE_B3, SCALE_C4, SCALE_D4, SCALE_B3, SCALE_A3, SCALE_G3, SCALE_B3, SCALE_NONE,
+                // SCALE_B3, SCALE_G3, SCALE_G3, SCALE_B3, SCALE_G3, SCALE_G3, SCALE_E3, SCALE_G3, SCALE_E3, SCALE_D4, SCALE_B3, SCALE_A3, SCALE_G3, SCALE_A3, SCALE_G3, SCALE_NONE,
+                // SCALE_G3, SCALE_D3, SCALE_G3, SCALE_D3, SCALE_D3, SCALE_G3, SCALE_G3, SCALE_G3, SCALE_G3, SCALE_G3, SCALE_G3, SCALE_G3, SCALE_G3, SCALE_D4, SCALE_E3, SCALE_D4, SCALE_D4, SCALE_NONE,   
+                // SCALE_G3, SCALE_NONE, SCALE_D3, SCALE_G3, SCALE_G3, SCALE_D3, SCALE_G3, SCALE_G3, SCALE_D3, SCALE_F3, SCALE_F3, SCALE_F3, SCALE_G3, SCALE_A3, SCALE_G3, SCALE_G3
             };
-            const int lengths3[] = {400, 600, 300};
+            const int lengths3[] = {
+              // 200, 200, 200, 400, 50, 200,
+              100, 50, 50, 100, 50, 50, 100, 100, 100, 200, 50, 50, 50, 200, 100, 100,
+              // 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 400, 200,
+              // 100, 50, 50, 50, 100, 100, 100, 100, 200, 50, 50, 100, 200, 100, 100,
+              // 100, 100, 100, 100, 100, 200, 100, 100, 200, 100, 200,
+              // 50,25,25,50,25,25,25,25,50,50,100,25,25,25,100,50,50,
+              // 50,50,50,50,50,50,50,50,50,50,50,200,100,
+              // 50,25,25,50,25,25,50,50,50,100,25,25,25,100,50,50,
+              // 25,50,25,25,25,25,50,50,50,50,50,50,50,50,50,50,50,
+              // 25,25,50,50,50,50,50,50,50,50,50,50,50,50,50,
+            };
             playPattern(pattern3, lengths3, sizeof(pattern3) / sizeof(pattern3[0]));
         }
     }
